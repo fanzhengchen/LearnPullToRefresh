@@ -2,24 +2,19 @@ package com.example.administrator.learneventbus;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
 import android.support.v7.app.AppCompatActivity;
+import android.text.format.DateUtils;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
-import com.orhanobut.logger.Logger;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
@@ -41,7 +36,7 @@ public class PullActivity extends AppCompatActivity {
     private String[] data = null;
     private Activity activity;
     private int index = 0;
-    private List<String> listItem = new ArrayList<>();
+    private List<String> listItem = new LinkedList<>();
     private Observable observable;
 
     @Override
@@ -56,6 +51,14 @@ public class PullActivity extends AppCompatActivity {
 
 
         mListView.setMode(PullToRefreshBase.Mode.BOTH);
+        String updateTime = DateUtils.formatDateTime(this, System.currentTimeMillis(),
+                DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_WEEKDAY);
+
+        mListView.getLoadingLayoutProxy().setLastUpdatedLabel(updateTime);
+        mListView.getLoadingLayoutProxy().setPullLabel("pull");
+        mListView.getLoadingLayoutProxy().setRefreshingLabel("refreshing");
+        mListView.getLoadingLayoutProxy().setReleaseLabel("release");
+//        mListView.set
         mListView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener2<ListView>() {
             @Override
             public void onPullDownToRefresh(final PullToRefreshBase<ListView> refreshView) {
@@ -70,6 +73,8 @@ public class PullActivity extends AppCompatActivity {
                             @Override
                             public void call(String s) {
                                 Toast.makeText(PullActivity.this, s, Toast.LENGTH_SHORT).show();
+                                listItem.add(0, "top refresh");
+                                adapter.notifyDataSetChanged();
                                 refreshView.onRefreshComplete();
                             }
                         });
@@ -89,6 +94,8 @@ public class PullActivity extends AppCompatActivity {
                             @Override
                             public void call(String s) {
                                 Toast.makeText(PullActivity.this, s, Toast.LENGTH_SHORT).show();
+                                listItem.add("bottom refresh");
+                                adapter.notifyDataSetChanged();
                                 refreshView.onRefreshComplete();
                             }
                         });
